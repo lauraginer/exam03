@@ -1,9 +1,7 @@
-
-#include <stdarg.h>
 #include <unistd.h>
-//#include <stdio.h>
+#include <stdarg.h>
 
-void putstr(char *str, int *count)
+void printstr(char *str, int *count)
 {
 	int i = 0;
 
@@ -17,28 +15,14 @@ void putstr(char *str, int *count)
 	{
 		write(1, &str[i], 1);
 		i++;
-		*count = *count + 1;
+		(*count)++;
 	}
 }
-void puthex(unsigned int n, int *count)
-{
-	char *str = "0123456789abcdef";
-	if(n >= 16)
-	{
-		puthex(n / 16, count);
-		write(1, &str[n % 16], 1);
-		*count = *count + 1;
-	}
-	else
-	{
-		write(1, &str[n], 1);
-		*count = *count + 1;
-	}	
-}
-void putnbr(int n, int *count)
+
+void printnum(int n, int *count)
 {
 	char *str = "0123456789";
-
+	
 	if(n == -2147483648)
 	{
 		write(1, "-2147483648", 11);
@@ -48,42 +32,45 @@ void putnbr(int n, int *count)
 	if(n < 0)
 	{
 		write(1, "-", 1);
-		*count = *count + 1;
 		n = -n;
+		(*count)++;
 	}
 	if(n > 9)
-	{
-		putnbr(n / 10, count);
-		write(1, &str[n % 10], 1);
-		*count = *count + 1;
-	}
-	else
-	{
-		write(1, &str[n], 1);
-		*count = *count + 1;
-	}
-
+		printnum(n / 10, count);
+	write(1, &str[n % 10], 1);
+	(*count)++;
 }
 
-int ft_printf(const char *format, ...)
+void printhex(unsigned int n, int *count)
 {
-	va_list args;
-	int count = 0;
+	char *str = "0123456789abcdef";
+
+	if(n >= 16)
+		printhex(n / 16, count);
+	write(1, &str[n % 16], 1);
+	(*count)++;
+}
+
+int ft_printf(const char *format, ... )
+{
 	int i = 0;
+	int count = 0;
+	va_list args;
 
 	if(!format)
 		return(-1);
+
 	va_start(args, format);
 	while(format[i])
 	{
 		if(format[i] == '%')
 		{
 			if(format[i + 1] == 's')
-				putstr(va_arg(args, char *), &count);
-			if(format[i + 1] == 'x')
-				puthex(va_arg(args, unsigned int), &count);
+				printstr(va_arg(args, char *), &count); 
 			if(format[i + 1] == 'd')
-				putnbr(va_arg(args, int), &count);
+				printnum(va_arg(args, int), &count);
+			if(format[i + 1] == 'x')
+				printhex(va_arg(args, unsigned int), &count);
 			i++;
 		}
 		else
@@ -101,7 +88,6 @@ int ft_printf(const char *format, ...)
 {
 	char *s1 = "toto";
 	int i = 45;
-	//unsigned int n = 24;
 
 	printf("original: %s\n", s1);
 	ft_printf("mi funcion: %s\n", s1);
